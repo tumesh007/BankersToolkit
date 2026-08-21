@@ -1,0 +1,19 @@
+{
+  "project_info": {
+    "project_number": "000000000000",
+    "project_id": "com.google.samples.apps.template",
+    "storage_bucket": "com.google.samples.apps.template.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:placeholder",
+        "android_client_info": { "package_name": "com.example.app" }
+      },
+      "oauth_client": [],
+      "api_key": [ { "current_key": "AIza-placeholder-android-api-key" } ],
+      "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
+    }
+  ],
+  "configuration_version": "1"
+}

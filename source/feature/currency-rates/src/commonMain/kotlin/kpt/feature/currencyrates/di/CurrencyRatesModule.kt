@@ -1,0 +1,25 @@
+/*
+ * Copyright 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * See See https://github.com/openMF/kmp-project-template/blob/main/LICENSE
+ */
+package kpt.feature.currencyrates.di
+
+import kpt.feature.currencyrates.ui.CurrencyRatesViewModel
+import kpt.feature.currencyrates.ui.RateHistoryViewModel
+import org.koin.core.module.dsl.viewModel
+import org.koin.dsl.module
+
+val CurrencyRatesModule = module {
+    viewModel {
+        CurrencyRatesViewModel(
+            currencyRepository = get(),
+            networkMonitor = get(),
+        )
+    }
+    viewModel { RateHistoryViewModel(get()) }
+}
