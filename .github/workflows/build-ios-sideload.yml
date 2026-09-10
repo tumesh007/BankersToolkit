@@ -25,6 +25,11 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      - name: Pre-build Kotlin Framework
+        run: |
+          cd source
+          ./gradlew :cmp-shared:assembleComposeAppReleaseXCFramework
+
       - name: Build Unsigned iOS App
         run: |
           cd source/cmp-ios
