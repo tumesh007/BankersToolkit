@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-14 # Mac with Xcode 15
+    runs-on: macos-15 # Mac with Xcode 16
 
     steps:
       - name: Checkout Code
