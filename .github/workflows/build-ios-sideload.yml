@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-15 # Mac with Xcode 16
+    runs-on: macos-15 # Mac with Xcode 16+
 
     steps:
       - name: Checkout Code
@@ -19,6 +19,11 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+
+      - name: Setup Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
 
       - name: Build Unsigned iOS App
         run: |
