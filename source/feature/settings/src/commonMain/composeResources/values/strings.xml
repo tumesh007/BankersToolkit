@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright 2022 Mifos Initiative
+
+    This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+    If a copy of the MPL was not distributed with this file,
+    You can obtain one at https://mozilla.org/MPL/2.0/.
+
+    See https://github.com/openMF/kmp-project-template/blob/main/LICENSE
+-->
+<resources>
+    <string name="feature_settings_top_app_bar_action_icon_description">Settings</string>
+    <string name="feature_settings_top_app_bar_navigation_icon_description">Search</string>
+    <string name="feature_settings_title">Settings</string>
+    <string name="feature_settings_loading">Loading…</string>
+    <string name="feature_settings_privacy_policy">Privacy policy</string>
+    <string name="feature_settings_licenses">Licenses</string>
+    <string name="feature_settings_brand_guidelines">Brand Guidelines</string>
+    <string name="feature_settings_feedback">Feedback</string>
+    <string name="feature_settings_theme">Theme</string>
+    <string name="feature_settings_brand_default">Default</string>
+    <string name="feature_settings_brand_android">Android</string>
+    <string name="feature_settings_dark_mode_preference">Dark mode preference</string>
+    <string name="feature_settings_dark_mode_config_system_default">System default</string>
+    <string name="feature_settings_dark_mode_config_light">Light</string>
+    <string name="feature_settings_dark_mode_config_dark">Dark</string>
+    <string name="feature_settings_dynamic_color_preference">Use Dynamic Color</string>
+    <string name="feature_settings_dynamic_color_yes">Yes</string>
+    <string name="feature_settings_dynamic_color_no">No</string>
+    <string name="feature_settings_dismiss_dialog_button_text">OK</string>
+    <string name="feature_settings_change_theme_text">Change Theme</string>
+    <string name="feature_settings_change_theme_placeholder_text">Change Theme</string>
+    <string name="feature_settings_change_language_text">Change Language</string>
+    <string name="feature_settings_change_language_placeholder_text">Change Language</string>
+    <string name="feature_settings_language_preference">Language</string>
+
+    <!-- ===== RULE-IMPL-NO-HARDCODED-STRING-001 backfill (W2-6 store5-superbrain-v2) ===== -->
+    <!-- SettingsScreen — dev-tools sheet + app-info row -->
+    <string name="feature_settings_dev_tools_title">Dev tools</string>
+    <string name="feature_settings_dev_transition_gallery">Transition Gallery</string>
+    <string name="feature_settings_dev_state_gallery">State Gallery</string>
+    <string name="feature_settings_dev_close">Close</string>
+
+    <!-- NotificationScreen — empty state -->
+    <string name="feature_settings_notifications_empty_title">No notifications yet</string>
+    <string name="feature_settings_notifications_empty_message">You\'ll see bill reminders and rate alerts here.</string>
+
+    <!-- Sync &amp; Drafts screen (template-level draft/sync inventory) -->
+    <string name="feature_settings_sync_drafts_row">Sync &amp; Drafts</string>
+    <string name="feature_settings_sync_drafts_row_description">View and manage drafts and pending syncs</string>
+    <string name="feature_settings_sync_drafts_title">Sync &amp; Drafts</string>
+    <string name="feature_settings_sync_drafts_empty_title">Nothing to sync</string>
+    <string name="feature_settings_sync_drafts_empty_message">Drafts you save offline and records waiting to sync will appear here.</string>
+    <string name="feature_settings_sync_drafts_section_drafts">Drafts</string>
+    <string name="feature_settings_sync_drafts_section_syncing">Syncing</string>
+    <string name="feature_settings_sync_drafts_section_failed">Failed</string>
+    <string name="feature_settings_sync_drafts_status_pending">Pending</string>
+    <string name="feature_settings_sync_drafts_status_retrying">Retrying</string>
+    <string name="feature_settings_sync_drafts_status_failed">Failed</string>
+    <string name="feature_settings_sync_drafts_retry">Retry</string>
+    <string name="feature_settings_sync_drafts_discard">Discard</string>
+    <string name="feature_settings_sync_drafts_prune">Prune expired</string>
+    <string name="feature_settings_sync_drafts_discard_confirm_title">Discard draft?</string>
+    <string name="feature_settings_sync_drafts_discard_confirm_message">This permanently deletes the saved draft. This can\'t be undone.</string>
+    <string name="feature_settings_sync_drafts_discard_confirm_cancel">Cancel</string>
+</resources>

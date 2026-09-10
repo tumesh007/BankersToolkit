@@ -1,0 +1,49 @@
+name: Build iOS App for Sideloading
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  build-ios:
+    runs-on: macos-14 # Mac with Xcode 15
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Unsigned iOS App
+        run: |
+          cd source/cmp-ios
+          xcodebuild \
+            -project iosApp.xcodeproj \
+            -scheme prodRelease \
+            -configuration prodRelease \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            SYMROOT="$(PWD)/build" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          # Find the built .app bundle and copy it to Payload
+          APP_PATH=$(find source/cmp-ios/build/prodRelease-iphoneos -name "*.app" -type d | head -n 1)
+          cp -R "$APP_PATH" Payload/
+          zip -r BankersToolkit-iOS.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BankersToolkit-iOS-Unsigned
+          path: BankersToolkit-iOS.ipa

@@ -1,0 +1,300 @@
+/*
+ * Copyright 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * See See https://github.com/openMF/kmp-project-template/blob/main/LICENSE
+ */
+package kpt.feature.settings
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import io.github.mobilebytelabs.kmptoolkit.firebase.analytics.AnalyticsHelper
+import io.github.mobilebytelabs.kmptoolkit.firebase.compose.TrackScreenView
+import io.github.mobilebytelabs.kmptoolkit.firebase.compose.rememberAnalyticsHelper
+import kpt.core.base.designsystem.component.AppCard
+import kpt.core.base.ui.AppInfo
+import kpt.core.designsystem.icon.AppIcons
+import kpt.core.designsystem.theme.spacing
+import kpt.core.ui.scaffold.KptScaffold
+import kpt.feature.settings.generated.resources.Res
+import kpt.feature.settings.generated.resources.feature_settings_change_language_placeholder_text
+import kpt.feature.settings.generated.resources.feature_settings_change_language_text
+import kpt.feature.settings.generated.resources.feature_settings_change_theme_placeholder_text
+import kpt.feature.settings.generated.resources.feature_settings_change_theme_text
+import kpt.feature.settings.generated.resources.feature_settings_dev_close
+import kpt.feature.settings.generated.resources.feature_settings_dev_tools_title
+import kpt.feature.settings.generated.resources.feature_settings_sync_drafts_row
+import kpt.feature.settings.generated.resources.feature_settings_sync_drafts_row_description
+import org.jetbrains.compose.resources.stringResource
+
+@Composable
+internal fun SettingsScreen(
+    onBackClick: () -> Unit,
+    onSyncAndDraftsClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    devMenuEntries: List<DevMenuEntry> = emptyList(),
+) {
+    val analyticsHelper = rememberAnalyticsHelper()
+    var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
+    var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
+    var showDevMenu by rememberSaveable { mutableStateOf(false) }
+
+    if (showSettingsDialog) {
+        SettingsDialog(
+            onDismiss = {
+                analyticsHelper.logSettingsDialogVisible(false)
+                showSettingsDialog = false
+            },
+        )
+    }
+
+    if (showLanguageDialog) {
+        LanguageDialog(
+            onDismiss = {
+                analyticsHelper.logLanguageDialogVisible(false)
+                showLanguageDialog = false
+            },
+        )
+    }
+
+    if (showDevMenu) {
+        DevMenuDialog(
+            entries = devMenuEntries,
+            onDismiss = { showDevMenu = false },
+        )
+    }
+
+    // Footer long-press surfaces the dev menu when at least one dev entry is available.
+    val hasDevEntries = devMenuEntries.isNotEmpty()
+    val onFooterLongClick: (() -> Unit)? = if (hasDevEntries) {
+        { showDevMenu = true }
+    } else {
+        null
+    }
+
+    SettingsScreenContent(
+        modifier = modifier
+            .fillMaxSize()
+            .testTag(TestTags.Settings.SCREEN),
+        onBackClick = onBackClick,
+        onThemeCardClick = {
+            analyticsHelper.logSettingsDialogVisible(true)
+            showSettingsDialog = true
+        },
+        onLanguageCardClick = {
+            analyticsHelper.logLanguageDialogVisible(true)
+            showLanguageDialog = true
+        },
+        onSyncAndDraftsClick = onSyncAndDraftsClick,
+        onFooterLongClick = onFooterLongClick,
+    )
+
+    TrackScreenView(screenName = "SettingsScreen")
+}
+
+@Composable
+internal fun SettingsScreenContent(
+    onBackClick: () -> Unit,
+    onThemeCardClick: () -> Unit,
+    onLanguageCardClick: () -> Unit,
+    onSyncAndDraftsClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onFooterLongClick: (() -> Unit)? = null,
+) {
+    val sp = MaterialTheme.spacing
+    KptScaffold(
+        title = "Settings",
+        onNavigationIconClick = onBackClick,
+        modifier = modifier,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = sp.lg),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(sp.md),
+        ) {
+            ThemeCard(onClick = onThemeCardClick)
+            LanguageCard(onClick = onLanguageCardClick)
+            SyncAndDraftsCard(onClick = onSyncAndDraftsClick)
+            Spacer(modifier = Modifier.fillMaxWidth().padding(sp.sm))
+            VersionLabel(onLongClick = onFooterLongClick)
+        }
+    }
+}
+
+@Composable
+internal fun SyncAndDraftsCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    SettingsRowCard(
+        icon = AppIcons.Payment,
+        title = stringResource(Res.string.feature_settings_sync_drafts_row),
+        contentDescription = stringResource(Res.string.feature_settings_sync_drafts_row_description),
+        accentColor = MaterialTheme.colorScheme.secondary,
+        onClick = onClick,
+        modifier = modifier,
+    )
+}
+
+/**
+ * Dev-menu dialog surfaced by long-pressing the [VersionLabel] footer. Renders one row per
+ * [DevMenuEntry] supplied by the caller (e.g. `cmp-navigation`'s `ShowcaseRegistry`). The
+ * dialog is only reachable when the list is non-empty — release builds / neutralized forks
+ * pass an empty list and the footer long-press handler is `null`.
+ */
+@Composable
+private fun DevMenuDialog(
+    entries: List<DevMenuEntry>,
+    onDismiss: () -> Unit,
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.feature_settings_dev_tools_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm)) {
+                entries.forEach { entry ->
+                    androidx.compose.material3.TextButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            onDismiss()
+                            entry.onClick()
+                        },
+                    ) { Text(entry.label) }
+                }
+            }
+        },
+        confirmButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.feature_settings_dev_close))
+            }
+        },
+    )
+}
+
+/**
+ * Static version footer label. When the caller supplies a non-empty `devMenuEntries`
+ * list, long-pressing opens the Dev tools menu (each entry becomes a row). When the list
+ * is empty (release builds / neutralized forks) the long-press handler is `null`, so the
+ * label behaves as a plain text footer.
+ *
+ * Wire point: `cmp-navigation`'s `BackboneRegistry.backboneDestinations` passes the
+ * `devMenuEntries` from `ShowcaseRegistry.devSettingsEntries(...)`, which is empty on
+ * release builds.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun VersionLabel(onLongClick: (() -> Unit)?, modifier: Modifier = Modifier) {
+    // App-name footer rendered from the common AppInfo.appDisplayName accessor (BuildKonfig →
+    // gradle/fork.properties#app.display.name), not a hardcoded string resource — so a fork rebrands
+    // in app-profile in one place (S9/T10).
+    val rowModifier = if (onLongClick != null) {
+        modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = { /* no-op short-tap */ },
+                onLongClick = onLongClick,
+            )
+    } else {
+        modifier.fillMaxWidth()
+    }
+    Text(
+        text = AppInfo.appDisplayName,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = rowModifier,
+    )
+}
+
+@Composable
+internal fun ThemeCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    SettingsRowCard(
+        icon = AppIcons.Sun,
+        title = stringResource(Res.string.feature_settings_change_theme_text),
+        contentDescription = stringResource(Res.string.feature_settings_change_theme_placeholder_text),
+        accentColor = MaterialTheme.colorScheme.tertiary,
+        onClick = onClick,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun LanguageCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    SettingsRowCard(
+        icon = AppIcons.Language,
+        title = stringResource(Res.string.feature_settings_change_language_text),
+        contentDescription = stringResource(Res.string.feature_settings_change_language_placeholder_text),
+        accentColor = MaterialTheme.colorScheme.primary,
+        onClick = onClick,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun SettingsRowCard(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    contentDescription: String,
+    accentColor: androidx.compose.ui.graphics.Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val sp = MaterialTheme.spacing
+    AppCard(
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
+        accentColor = accentColor,
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(sp.md),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(sp.md),
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = accentColor)
+            Text(text = title, modifier = Modifier.weight(1f))
+            IconButton(onClick = onClick) {
+                Icon(imageVector = AppIcons.ArrowRight, contentDescription = contentDescription)
+            }
+        }
+    }
+}
+
+private fun AnalyticsHelper.logSettingsDialogVisible(visible: Boolean) {
+    logEvent(
+        type = "settings_dialog_visible",
+        params = mapOf("visible" to visible.toString()),
+    )
+}
+
+private fun AnalyticsHelper.logLanguageDialogVisible(visible: Boolean) {
+    logEvent(
+        type = "language_dialog_visible",
+        params = mapOf("visible" to visible.toString()),
+    )
+}

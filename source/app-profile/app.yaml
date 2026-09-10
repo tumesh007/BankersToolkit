@@ -1,0 +1,136 @@
+# app-profile/app.yaml — fork-owned white-label deployment SoT (COMMON, platform-agnostic).
+#
+# This is the SINGLE source of truth for all fork-owned deployment data (text + media).
+# Edit HERE — never gradle/fork.properties (now a generated/fallback build-bridge).
+# deployment/ reads this via deployment/_shared/config.rb (AppProfile.get).
+# `sync-dirs.sh` NEVER rewrites app-profile/** (owner: fork in customization-surface.yaml).
+#
+# Platform-DIFFERENT values live in app-profile/platforms/<platform>/*.yaml — no duplication.
+
+identity:
+  app_id: com.example.app                 # PLACEHOLDER — set your reverse-DNS bundle id (SoT for appId; mirrored to gradle/libs.versions.toml)
+  app_name: "Banker's Toolkit"                    # PLACEHOLDER — set your app display name (Android app_name, iOS CFBundleDisplayName, settings footer)
+  namespace: com.example.app              # PLACEHOLDER — mirrors app_id
+
+# Per-flavor network endpoints + demo credentials + log tag. syncForkConfig emits these into
+# gradle/fork.properties (network.base.url.{demo,prod} / demo.username / demo.password / log.tag),
+# which KMPFlavorsConventionPlugin reads into per-flavor BuildConfig (BASE_URL / DEMO_USERNAME /
+# DEMO_PASSWORD / LOG_TAG). Blank falls back to the template default baked into the plugin. (B4)
+network:
+  demo_base_url: https://demo.example.com   # PLACEHOLDER — fork sets its demo endpoint
+  prod_base_url: https://api.example.com     # PLACEHOLDER — fork sets its prod endpoint
+  demo_username: demo
+  demo_password: demo
+  log_tag: AppToolkit
+  # Declarative access-point topology — every REST + Supabase endpoint the app talks to, in ONE place.
+  # This is the SoT for core/network's AccessPointRegistry: a fork declares its N endpoints here
+  # (e.g. 3 REST + 2 Supabase), and ProjectNetworkModule wires each API in one line via
+  # `restApi("<id>") { it.createXApi() }` — core/network auto-builds the transport from the id's
+  # base_url + loggable_host. `type: rest | supabase`. (B3, epic pure-white-label-store5-network)
+  access_points:
+    - id: main
+      type: rest
+      base_url: https://api.example.com/
+      loggable_host: api.example.com
+    - id: staging
+      type: rest
+      base_url: https://staging.example.com/
+      loggable_host: staging.example.com
+    - id: supabase_data
+      type: supabase
+      base_url: https://project.supabase.co
+      loggable_host: project.supabase.co
+    # demo showcase REST endpoints — every server the toolkit actually talks to, wired in
+    # ProjectNetworkModule via restApi("<id>") { it.createXApi() }.
+    - id: jsonplaceholder            # WRITABLE, for the Store5 MUTABLE archetype
+      type: rest
+      base_url: https://jsonplaceholder.typicode.com/
+      loggable_host: jsonplaceholder.typicode.com
+    - id: frankfurter                # FX / currency exchange rates
+      type: rest
+      base_url: https://api.frankfurter.dev/
+      loggable_host: api.frankfurter.dev
+    - id: coingecko                  # crypto market data
+      type: rest
+      base_url: https://api.coingecko.com/
+      loggable_host: api.coingecko.com
+    - id: fred                       # US Federal Reserve economic data
+      type: rest
+      base_url: https://api.stlouisfed.org/
+      loggable_host: api.stlouisfed.org
+      proxied_host: api.stlouisfed.org   # blocks direct CORS calls → route via platform proxy
+      secret_alias: template-fred-api-key # request-time API key — from the vault (secrets-manifest.yaml),
+                                         # materialized to local.properties → BuildKonfig.FRED_API_KEY
+    - id: worldbank                  # World Bank macro indicators
+      type: rest
+      base_url: https://api.worldbank.org/
+      loggable_host: api.worldbank.org
+
+org:
+  name: Your Organization Name              # PLACEHOLDER — fork sets its legal org name
+  email: you@example.com                     # PLACEHOLDER
+  first_name: Your                           # PLACEHOLDER — App Store review contact first name
+  last_name: Org                             # PLACEHOLDER — App Store review contact last name
+  phone: "+15555550100"                     # PLACEHOLDER
+  copyright: "© 2026 Your Organization Name. All rights reserved."   # PLACEHOLDER — desktop / Mac App Store packaging copyright (org.copyright)
+  marketing_url: https://example.com          # PLACEHOLDER
+  privacy_url: https://example.com/privacy    # PLACEHOLDER
+  support_url: https://example.com/support    # PLACEHOLDER
+
+legal:
+  company_name: Your Organization Name        # PLACEHOLDER
+  jurisdiction: United States
+  effective_date: June 6, 2026
+  contact_email: you@example.com              # PLACEHOLDER
+
+keystore_dn:
+  org_unit: Mobile
+  city: Arusha
+  state: Arusha
+  country: TZ
+
+store:
+  primary_locale: en-US
+  # PLACEHOLDER store listing copy — a fork MUST author these before shipping (product-health
+  # store-listing warns while any YOUR_* / "App Toolkit" placeholder marker remains on a fork).
+  title: "Banker's Toolkit"                        # PLACEHOLDER — app display name (App Store name / Play title)
+  subtitle: 'YOUR_APP_SUBTITLE'               # PLACEHOLDER — short subtitle (App Store)
+  promotional_text: 'YOUR_APP_PROMO_TEXT'     # PLACEHOLDER — promotional text
+  description: 'YOUR_APP_DESCRIPTION — write your long store description here (App Store / Play full description).'   # PLACEHOLDER
+  release_notes: 'YOUR_APP_RELEASE_NOTES — describe what is new in this release.'   # PLACEHOLDER
+  copyright: '© YOUR_ORGANIZATION_NAME. All rights reserved.'   # PLACEHOLDER
+  age_rating: '4+'                            # iOS + macOS App Store age rating (store.ios.age.rating)
+  review:
+    notes: 'YOUR_APP_REVIEW_NOTES — notes for the App Store / Play review team (test steps, demo access).'   # PLACEHOLDER
+    first_name: 'Your'                         # PLACEHOLDER — App Store review contact (mirrors org.first_name)
+    last_name: 'Org'                           # PLACEHOLDER — App Store review contact (mirrors org.last_name)
+    demo_user: ""                            # store.review.demo.user (blank — no login)
+    demo_password: ""                        # store.review.demo.password
+  app_description: "Banker's Toolkit"                # PLACEHOLDER — desktop packaging description (app.description)
+
+media:
+  root: media
+
+# ── Deploy targets — fork-facing PLATFORM on/off intent ───────────────────────
+# This block is the FORK-owned answer to "which PLATFORMS does my fork ship?".
+# It is COARSE (one row per platform) and pairs with the template-owned, FINE-grained
+# deployment/DEPLOYMENT_MANIFEST.yaml (one row per deploy TARGET, e.g. android-firebase,
+# ios-testflight, desktop-msi-signed).
+#
+#   • app.yaml#targets      → which PLATFORMS a fork ships   (this file, owner: fork)
+#   • DEPLOYMENT_MANIFEST    → which TARGETS exist per platform (owner: merge — new template
+#                              targets propagate on sync; the fork keeps its enabled/tier)
+#
+# A concrete deploy TARGET is active iff BOTH hold:
+#   (1) its platform is enabled here in app.yaml#targets, AND
+#   (2) the target's own `enabled:` is true in DEPLOYMENT_MANIFEST.yaml.
+# The two coexist at different granularity — neither replaces the other.
+# NOTE: macOS deploy targets live UNDER the manifest's `desktop` platform (mac-app-store,
+# mac-testflight, dmg-notarized) — there is no separate `macos` platform block in the manifest.
+targets:
+  android: { enabled: true, tier: internal }
+  ios:     { enabled: true, tier: internal }
+  macos:   { enabled: true, tier: internal }
+  web:     { enabled: true, tier: internal }
+  windows: { enabled: true, tier: internal }
+  ubuntu:  { enabled: true, tier: internal }

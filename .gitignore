@@ -1,0 +1,27 @@
+# Build artifacts
+source/**/build/
+source/**/.gradle/
+source/local.properties
+source/gradle.properties
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# OS
+.DS_Store
+Thumbs.db
+
+# APKs (keep only release)
+*.apk
+!release/*.apk
+
+# Secrets
+secrets/
+keystores/
+*.keystore
+*.jks
+.env
+.local.properties
