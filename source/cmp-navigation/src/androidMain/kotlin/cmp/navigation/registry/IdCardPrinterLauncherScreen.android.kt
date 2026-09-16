@@ -11,14 +11,10 @@ import com.idcardprinter.app.IdCardMainActivity
 @Composable
 actual fun IdCardPrinterLauncherScreen(onNavigateBack: () -> Unit) {
     val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) {
-        onNavigateBack()
-    }
 
     LaunchedEffect(Unit) {
         val intent = Intent(context, IdCardMainActivity::class.java)
-        launcher.launch(intent)
+        context.startActivity(intent)
+        onNavigateBack()
     }
 }

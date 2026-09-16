@@ -95,6 +95,24 @@ object ProformaTemplates {
                 drawField("Adverse Remarks, if any", line)
                 drawField("Other observations in brief", fill(visit.remarks))
             }
+            ReportFormat.CASA_CURRENT_ACCOUNT -> {
+                drawHeading("VISIT PERFORMA - CURRENT ACCOUNT (CASA)")
+                drawField("Branch (BO) / D.No.", fill(visit.branch))
+                drawField("Date of Visit", fill(visit.visitDate))
+                drawField("Reference / Account Number", fill(visit.accountNumber))
+                drawField("Name of Customer(s)", fill(visit.customerName))
+                drawField("Residential Address of Beneficial Owner(s)", line)
+                drawField("Business Place Address of the Customer", fill(visit.address))
+                drawField("Business Place (Rented / Owned)", line)
+                drawField("Date of Verification (Residential Address)", line)
+                drawField("Date of Verification (Business Place Address)", line)
+                drawField("Visiting Official Name", fill(visit.officerName))
+                drawField("Official Designation", line)
+                drawField("PF No. / GBPA No.", line)
+                drawField("Mobile No.", line)
+                drawHeading("Declaration")
+                drawField("Confirmation", "I confirm the correctness of the residential address of the Beneficial Owner(s) and business place address of the customer.")
+            }
         }
     }
 }

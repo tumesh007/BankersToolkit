@@ -149,7 +149,7 @@ object FeatureRegistry {
 
         composableWithPushTransitions<IdCardPrinterRoute> {
             IdCardPrinterLauncherScreen(
-                onNavigateBack = { navController.popBackStackSafely() }
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

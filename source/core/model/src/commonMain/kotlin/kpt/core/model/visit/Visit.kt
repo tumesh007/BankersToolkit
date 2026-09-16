@@ -32,5 +32,6 @@ enum class ReportFormat(val displayName: String) {
     PART_B("Part B - Project Loans (Implementation)"),
     PART_C("Part C - Project Loans (Commercial)"),
     PART_D("Part D - Immovable Property"),
-    POST_SANCTION_UPTO_50L("Annexure I-C - Post-Sanction (Upto 50L)")
+    POST_SANCTION_UPTO_50L("Annexure I-C - Post-Sanction (Upto 50L)"),
+    CASA_CURRENT_ACCOUNT("CASA / Current Account Visit")
 }

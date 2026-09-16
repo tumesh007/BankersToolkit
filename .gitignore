@@ -17,6 +17,7 @@ Thumbs.db
 # APKs & Releases
 *.apk
 *.zip
+apk/
 github_release_*/
 release/
 
@@ -31,4 +32,5 @@ keystores/
 # Scratch & Temporary
 *.pdf
 tumesh00710oct26.txt
+source/upload_apk*.sh
 

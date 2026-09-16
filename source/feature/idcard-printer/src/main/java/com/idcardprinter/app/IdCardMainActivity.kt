@@ -21,6 +21,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -114,11 +115,7 @@ class IdCardMainActivity : AppCompatActivity() {
                 backQuad = result.quad
                 updateBackCardUi()
             }
-            // Invalidate previously cached A4 exports
-            latestA4Bitmap = null
-            latestPdfFile = null
-            latestPngFile = null
-            binding.cardOutputTracker.visibility = View.GONE
+            invalidateCaches()
         }
     }
 
@@ -127,12 +124,21 @@ class IdCardMainActivity : AppCompatActivity() {
         binding = ActivityIdCardMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        onBackPressedDispatcher.addCallback(this) {
+            finish()
+        }
+
         setupListeners()
         updateFrontCardUi()
         updateBackCardUi()
     }
 
     private fun setupListeners() {
+        // App header back button
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
+
         // Front slot listeners
         binding.btnFrontCamera.setOnClickListener {
             targetSide = CardSide.FRONT
@@ -158,6 +164,7 @@ class IdCardMainActivity : AppCompatActivity() {
             frontRawPath = null
             frontQuad = null
             frontEnhanced = null
+            invalidateCaches()
             updateFrontCardUi()
         }
 
@@ -186,6 +193,7 @@ class IdCardMainActivity : AppCompatActivity() {
             backRawPath = null
             backQuad = null
             backEnhanced = null
+            invalidateCaches()
             updateBackCardUi()
         }
 
@@ -291,6 +299,13 @@ class IdCardMainActivity : AppCompatActivity() {
         }
     }
 
+    private fun invalidateCaches() {
+        latestA4Bitmap = null
+        latestPdfFile = null
+        latestPngFile = null
+        binding.cardOutputTracker.visibility = View.GONE
+    }
+
     private fun rotateCardInSlot(side: CardSide) {
         val path = if (side == CardSide.FRONT) frontRawPath else backRawPath ?: return
         showLoading("Rotating card...")
@@ -303,10 +318,13 @@ class IdCardMainActivity : AppCompatActivity() {
             FileOutputStream(file).use { out ->
                 rotated.compress(Bitmap.CompressFormat.JPEG, 95, out)
             }
-            val newQuad = engine.detectCorners(rotated)
+            
+            val currentQuad = if (side == CardSide.FRONT) frontQuad else backQuad
+            val newQuad = currentQuad?.rotated90(bmp.width, bmp.height) ?: engine.detectCorners(rotated)
 
             withContext(Dispatchers.Main) {
                 hideLoading()
+                invalidateCaches()
                 if (side == CardSide.FRONT) {
                     frontRawPath = file.absolutePath
                     frontQuad = newQuad

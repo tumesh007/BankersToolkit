@@ -8,6 +8,7 @@ All notable changes to the Banker's Toolkit project will be documented in this f
 - **ID Card Printer Integration (`:feature:idcard-printer`):**
   - Full batch ID card formatting, multi-image gallery import, high-precision cropping, and direct wireless/system printer support.
   - Supports standard KYC card formats (Aadhaar, PAN, Voter ID, Driving License, Custom).
+  - Enhanced `CardCropView` with full edge-dragging and entire box-dragging controls.
   - Integrated directly into the main app with unified Back navigation and app theme.
 - **PDF Redactor Integration (`:feature:pdf-redactor`):**
   - Built-in PDF watermark remover and sensitive information redaction engine powered by `pdfbox-android`.
@@ -15,6 +16,13 @@ All notable changes to the Banker's Toolkit project will be documented in this f
 - **Document & KYC Tools Suite:**
   - Added dedicated **"DOCUMENT & KYC TOOLS"** section to the Banker's Toolkit Dashboard.
   - Registered `PdfRedactorRoute` and `IdCardPrinterRoute` in navigation backbone.
+- **Visit Report CASA Proforma:**
+  - Added CASA / Current Account visit verification proforma template and export layout.
+
+### Fixed
+- **Navigation Flow**: Fixed double-back issue when exiting ID Card Printer; tapping Back (via header arrow, gesture, or system back key) returns immediately to the menu in a single action.
+- **Crop Rotation**: Preserved crop boundary coordinates when rotating 90° using `CardQuad.rotated90()`.
+- **Cache Lifecycle**: Automatically invalidate stale A4 exports and bitmaps when clearing slots or rotating cards.
 
 ## [v2.2] - 2026-09-09
 
