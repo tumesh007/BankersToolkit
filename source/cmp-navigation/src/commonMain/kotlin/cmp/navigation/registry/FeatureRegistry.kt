@@ -27,6 +27,8 @@ import kpt.feature.emicalculator.navigation.emiCalculatorDestination
 import kpt.feature.gpscamera.di.GpsCameraModule
 import kpt.feature.gpscamera.ui.GpsCameraScreen
 import kpt.feature.gpscamera.ui.GpsCameraViewModel
+import kpt.feature.pdfredactor.di.PdfRedactorModule
+import kpt.feature.pdfredactor.ui.PdfRedactorScreen
 import kpt.feature.visitreport.di.VisitReportModule
 import kpt.feature.visitreport.ui.VisitEditorScreen
 import kpt.feature.visitreport.ui.VisitEditorViewModel
@@ -49,12 +51,19 @@ data class VisitPreviewRoute(val visitId: String = "")
 data class GpsCameraRoute(val visitId: String = "")
 
 @Serializable
+data object PdfRedactorRoute
+
+@Serializable
+data object IdCardPrinterRoute
+
+@Serializable
 object FeatureRegistry {
     val featureKoinModules: List<Module> = listOf(
         EmiCalculatorModule,
         CalculatorsModule,
         VisitReportModule,
         GpsCameraModule,
+        PdfRedactorModule,
         ProjectRepositoryModule,
         ProjectNetworkModule,
         ProjectDatabaseModule,
@@ -128,6 +137,18 @@ object FeatureRegistry {
                             ?.set("gps_photos_changed", true)
                     }
                 },
+                onNavigateBack = { navController.popBackStackSafely() }
+            )
+        }
+
+        composableWithPushTransitions<PdfRedactorRoute> {
+            PdfRedactorScreen(
+                onNavigateBack = { navController.popBackStackSafely() }
+            )
+        }
+
+        composableWithPushTransitions<IdCardPrinterRoute> {
+            IdCardPrinterLauncherScreen(
                 onNavigateBack = { navController.popBackStackSafely() }
             )
         }

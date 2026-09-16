@@ -133,7 +133,8 @@ include(":feature:add-to-watchlist")
 include(":feature:alerts")
 include(":feature:visit-report")
 include(":feature:gps-camera")
-// include(":feature:pdf-redactor")
+include(":feature:pdf-redactor")
+include(":feature:idcard-printer")
 // include(":feature:longbook-merger")
 // demo:end
 

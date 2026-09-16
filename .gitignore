@@ -14,9 +14,11 @@ source/gradle.properties
 .DS_Store
 Thumbs.db
 
-# APKs (keep only release)
+# APKs & Releases
 *.apk
-!release/*.apk
+*.zip
+github_release_*/
+release/
 
 # Secrets
 secrets/
@@ -25,3 +27,8 @@ keystores/
 *.jks
 .env
 .local.properties
+
+# Scratch & Temporary
+*.pdf
+tumesh00710oct26.txt
+

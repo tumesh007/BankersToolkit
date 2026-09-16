@@ -2,6 +2,20 @@
 
 All notable changes to the Banker's Toolkit project will be documented in this file.
 
+## [v3.0] - 2026-09-16
+
+### Added
+- **ID Card Printer Integration (`:feature:idcard-printer`):**
+  - Full batch ID card formatting, multi-image gallery import, high-precision cropping, and direct wireless/system printer support.
+  - Supports standard KYC card formats (Aadhaar, PAN, Voter ID, Driving License, Custom).
+  - Integrated directly into the main app with unified Back navigation and app theme.
+- **PDF Redactor Integration (`:feature:pdf-redactor`):**
+  - Built-in PDF watermark remover and sensitive information redaction engine powered by `pdfbox-android`.
+  - Configurable redaction presets, text blackout, coordinate masks, and multi-page processing.
+- **Document & KYC Tools Suite:**
+  - Added dedicated **"DOCUMENT & KYC TOOLS"** section to the Banker's Toolkit Dashboard.
+  - Registered `PdfRedactorRoute` and `IdCardPrinterRoute` in navigation backbone.
+
 ## [v2.2] - 2026-09-09
 
 ### Added

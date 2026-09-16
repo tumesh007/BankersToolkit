@@ -25,7 +25,9 @@ fun BankersToolkitDashboard(
     onNavigateToVisitReport: () -> Unit = {},
     onNavigateToGpsCamera: () -> Unit = {},
     onNavigateToEmiCalculator: () -> Unit = {},
-    onNavigateToAmortization: () -> Unit = {}
+    onNavigateToAmortization: () -> Unit = {},
+    onNavigateToIdCardPrinter: () -> Unit = {},
+    onNavigateToPdfRedactor: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -84,7 +86,24 @@ fun BankersToolkitDashboard(
             onClick = onNavigateToGpsCamera
         )
 
-        // Section 2: FINANCIAL TOOLS
+        // Section 2: DOCUMENT & KYC TOOLS
+        DashboardSectionTitle("DOCUMENT & KYC TOOLS")
+        ToolCard(
+            title = "ID Card Scanner & Printer",
+            subtitle = "1:1 wallet & KYC A4 sheets, 2.5x loupe crop, direct Wi-Fi printing",
+            icon = Icons.Default.Badge,
+            iconContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            onClick = onNavigateToIdCardPrinter
+        )
+        ToolCard(
+            title = "PDF Watermark Redactor",
+            subtitle = "Batch remove PNB Saksham & CBS download watermarks",
+            icon = Icons.Default.LayersClear,
+            iconContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            onClick = onNavigateToPdfRedactor
+        )
+
+        // Section 3: FINANCIAL TOOLS
         DashboardSectionTitle("FINANCIAL TOOLS")
         ToolCard(
             title = "EMI Calculator",

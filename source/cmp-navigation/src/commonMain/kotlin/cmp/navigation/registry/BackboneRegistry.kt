@@ -29,6 +29,8 @@ object BackboneRegistry {
             onNavigateToGpsCamera = { navController.navigate(GpsCameraRoute()) },
             onNavigateToEmiCalculator = { navController.navigateToEmiCalculator() },
             onNavigateToAmortization = { navController.navigateToAmortization() },
+            onNavigateToIdCardPrinter = { navController.navigate(IdCardPrinterRoute) },
+            onNavigateToPdfRedactor = { navController.navigate(PdfRedactorRoute) },
         )
     }
 

@@ -116,6 +116,7 @@ dependencies {
     implementation(projects.core.platform)
     implementation(projects.sync)
     implementation(projects.feature.gpsCamera)
+    implementation(project(":feature:idcard-printer"))
 
     // Compose
     implementation(libs.androidx.core.ktx)

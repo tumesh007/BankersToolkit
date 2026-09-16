@@ -40,5 +40,7 @@ dependencies {
     "commonMainImplementation"(project(":feature:add-to-watchlist"))
     "commonMainImplementation"(project(":feature:visit-report"))
     "commonMainImplementation"(project(":feature:gps-camera"))
+    "commonMainImplementation"(project(":feature:pdf-redactor"))
+    "androidMainImplementation"(project(":feature:idcard-printer"))
     // demo:end
 }
