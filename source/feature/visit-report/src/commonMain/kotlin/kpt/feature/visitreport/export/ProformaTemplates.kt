@@ -7,10 +7,12 @@ object ProformaTemplates {
     fun injectProformaFields(
         visit: Visit,
         drawHeading: (String) -> Unit,
-        drawField: (String, String) -> Unit
+        drawField: (String, String) -> Unit,
+        drawTable: ((headers: List<String>, rows: List<List<String>>, colWeights: List<Float>?) -> Unit)? = null
     ) {
         val line = "...................................................."
-        
+        val shortLine = "........................"
+
         fun fill(v: String?): String {
             return if (v.isNullOrBlank()) line else v
         }
@@ -77,23 +79,135 @@ object ProformaTemplates {
                 drawField("Taxes paid", line)
                 drawField("Utility bills name", line)
             }
-            ReportFormat.POST_SANCTION_UPTO_50L -> {
-                drawHeading("ANNEXURE I-C - POST-SANCTION (UPTO 50L)")
-                drawField("Name of the Borrower", fill(visit.customerName) + if (!visit.loanAccountNumber.isNullOrBlank()) " (A/C: ${visit.loanAccountNumber})" else "")
-                drawField("Branch/ Office", fill(visit.branch))
+            ReportFormat.PRE_SANCTION_UPTO_50L -> {
+                drawHeading("ANNEXURE I-A - PRE-SANCTION INSPECTION (UPTO ₹ 50 LAKH)")
+                drawField("Proforma Format", "PRE-SANCTION INSPECTION/ VERIFICATION REPORT FOR BUSINESS LOANS UP TO ₹ 50 LAKH (Fresh/Enhancement/Additional)")
+                drawField("Name of the Borrower", fill(visit.customerName) + if (visit.loanAccountNumber.isNotBlank()) " (A/C: ${visit.loanAccountNumber})" else "")
+                drawField("Branch / Office", fill(visit.branch))
                 drawField("Address Residential", fill(visit.address))
-                drawField("Registered Office/Place of Work", line)
-                drawField("Activity of the Unit (Industry / Sector)", line)
+                drawField("Registered Office / Place of Work", line)
+                drawField("Activity of the Unit (Industry / Sector)", fill(visit.purpose))
                 drawField("Details of Unit / Location visited", line)
-                drawField("Name of the person & designation contacted", line)
-                drawField("Details of facilities sought (TL/WC/Non-fund)", line)
-                drawField("Whether assets created out of Bank finance", line)
+                drawField("Person & Designation contacted", line)
+
+                drawHeading("Details of facilities sought from our Bank (Amt in ₹ lakh)")
+                if (drawTable != null) {
+                    val facilitiesHeaders = listOf("Type of facilities", "Existing Limit, if any", "Proposed Limit")
+                    val facilitiesRows = listOf(
+                        listOf("Term Loan", line, line),
+                        listOf("Working Capital", line, line),
+                        listOf("Non-Fund", line, line),
+                        listOf("TOTAL", line, line)
+                    )
+                    drawTable(facilitiesHeaders, facilitiesRows, listOf(1.5f, 1.2f, 1.2f))
+                } else {
+                    drawField("Facilities - Term Loan", "Existing: $shortLine | Proposed: $shortLine")
+                    drawField("Facilities - Working Capital", "Existing: $shortLine | Proposed: $shortLine")
+                    drawField("Facilities - Non-Fund", "Existing: $shortLine | Proposed: $shortLine")
+                    drawField("Facilities - TOTAL", "Existing: $shortLine | Proposed: $shortLine")
+                }
+
+                drawHeading("Unit Assessment & Verification Details")
+                drawField("Details of products traded / dealing with", line)
+                drawField("Operation of unit satisfactory (Existing Unit)", line)
+                drawField("Stock/Plant/Machinery as per financials submitted", line)
+                drawField("Where Loan is secured by IP (Annexure I-A1)", line)
+                drawField("Adverse feature (If any)", line)
+                drawField("Any other observation", fill(visit.observations.ifBlank { visit.remarks }))
+
+                drawHeading("Credentials & Antecedents Verification")
+                drawField("Market Verification Note", "Credentials & Antecedents* of Borrower(s)/ Promoters / Guarantors verified from at least two persons and found satisfactory (*Not Applicable for Govt/PSU/Listed Cos)")
+                if (drawTable != null) {
+                    val antecedentHeaders = listOf("Name of the Person", "Name of the Firm / Company", "Relation / Connection with Borrower")
+                    val antecedentRows = listOf(
+                        listOf("1. $line", line, line),
+                        listOf("2. $line", line, line)
+                    )
+                    drawTable(antecedentHeaders, antecedentRows, listOf(1.3f, 1.4f, 1.3f))
+                } else {
+                    drawField("Person 1 Verification", "Name: $shortLine | Firm: $shortLine | Relation: $shortLine")
+                    drawField("Person 2 Verification", "Name: $shortLine | Firm: $shortLine | Relation: $shortLine")
+                }
+
+                drawHeading("Visiting Official Sign-Off")
+                if (drawTable != null) {
+                    val signHeaders = listOf("Official Particulars", "Details & Confirmation")
+                    val signRows = listOf(
+                        listOf("Signature of Visiting Official", "_______________________________"),
+                        listOf("Visiting Official Name", fill(visit.officerName)),
+                        listOf("Designation & PF No.", "Designation: $shortLine | PF No: $shortLine"),
+                        listOf("Place & Date of Inspection", "Place: ${fill(visit.branch)} | Date: ${fill(visit.visitDate)}")
+                    )
+                    drawTable(signHeaders, signRows, listOf(1.2f, 2.5f))
+                } else {
+                    drawField("Visiting Official Name", fill(visit.officerName))
+                    drawField("Designation & PF No.", "Designation: $shortLine | PF No: $shortLine")
+                    drawField("Place & Date of Inspection", "Place: ${fill(visit.branch)} | Date: ${fill(visit.visitDate)}")
+                    drawField("Signature", "_______________________________")
+                }
+            }
+            ReportFormat.POST_SANCTION_UPTO_50L -> {
+                drawHeading("ANNEXURE I-C - POST-SANCTION (UPTO ₹ 50 LAKH)")
+                drawField("Proforma Format", "POST-SANCTION INSPECTION / VISIT REPORT FOR BUSINESS LOANS UPTO ₹ 50 LAKH (Renewal/ Review/ Consecutive Visit)")
+                drawField("Name of the Borrower", fill(visit.customerName) + if (visit.loanAccountNumber.isNotBlank()) " (A/C: ${visit.loanAccountNumber})" else "")
+                drawField("Branch / Office", fill(visit.branch))
+                drawField("Address Residential", fill(visit.address))
+                drawField("Registered Office / Place of Work", line)
+                drawField("Activity of the Unit (Industry / Sector)", fill(visit.purpose))
+                drawField("Details of Unit / Location visited", line)
+                drawField("Person & Designation contacted", line)
+
+                drawHeading("Details of facilities from our Bank (Amt in ₹ lakh)")
+                if (drawTable != null) {
+                    val facilitiesHeaders = listOf("Type of facilities", "Sanctioned Limit", "Outstanding Balance", "Status of Account")
+                    val facilitiesRows = listOf(
+                        listOf("Term Loan", line, line, line),
+                        listOf("Working Capital", line, line, line),
+                        listOf("Non-Fund", line, line, line),
+                        listOf("TOTAL", line, line, line)
+                    )
+                    drawTable(facilitiesHeaders, facilitiesRows, listOf(1.3f, 1.1f, 1.1f, 1.1f))
+                } else {
+                    drawField("Facilities - Term Loan", line)
+                    drawField("Facilities - Working Capital", line)
+                    drawField("Facilities - Non-Fund", line)
+                    drawField("Facilities - TOTAL", line)
+                }
+
+                drawHeading("Securities & Insurance Details")
+                drawField("Assets created out of Bank finance", line)
                 drawField("Securities insured with 'Agreed Bank Clause'", line)
-                drawField("Insurance Detail (Fixed assets / Inventory)", line)
-                drawField("Value of insurance / Valid upto", line)
-                drawField("Whether Loan is secured by IP", line)
+                if (drawTable != null) {
+                    val insHeaders = listOf("Insurance Detail", "Value of Insurance (₹ in Lakh)", "Valid Upto")
+                    val insRows = listOf(
+                        listOf("Fixed Assets", line, line),
+                        listOf("Inventory", line, line)
+                    )
+                    drawTable(insHeaders, insRows, listOf(1.4f, 1.4f, 1.2f))
+                } else {
+                    drawField("Insurance - Fixed Assets", line)
+                    drawField("Insurance - Inventory", line)
+                }
+                drawField("Whether Loan is secured by IP (Annexure I-C1)", line)
                 drawField("Adverse Remarks, if any", line)
-                drawField("Other observations in brief", fill(visit.remarks))
+                drawField("Other observations in brief", fill(visit.observations.ifBlank { visit.remarks }))
+
+                drawHeading("Visiting Official Sign-Off")
+                if (drawTable != null) {
+                    val signHeaders = listOf("Official Particulars", "Details & Confirmation")
+                    val signRows = listOf(
+                        listOf("Signature of Visiting Official", "_______________________________"),
+                        listOf("Visiting Official Name", fill(visit.officerName)),
+                        listOf("Designation & PF No.", "Designation: $shortLine | PF No: $shortLine"),
+                        listOf("Place & Date of Inspection", "Place: ${fill(visit.branch)} | Date: ${fill(visit.visitDate)}")
+                    )
+                    drawTable(signHeaders, signRows, listOf(1.2f, 2.5f))
+                } else {
+                    drawField("Visiting Official Name", fill(visit.officerName))
+                    drawField("Designation & PF No.", "Designation: $shortLine | PF No: $shortLine")
+                    drawField("Place & Date of Inspection", "Place: ${fill(visit.branch)} | Date: ${fill(visit.visitDate)}")
+                    drawField("Signature", "_______________________________")
+                }
             }
             ReportFormat.CASA_CURRENT_ACCOUNT -> {
                 drawHeading("VISIT PERFORMA - CURRENT ACCOUNT (CASA)")

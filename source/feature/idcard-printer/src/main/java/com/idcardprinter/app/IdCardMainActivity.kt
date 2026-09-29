@@ -50,6 +50,7 @@ class IdCardMainActivity : AppCompatActivity() {
     private val engine = IdCardEngine()
 
     // Card State
+    private var isDocumentMode: Boolean = false
     private var frontRawPath: String? = null
     private var frontQuad: CardQuad? = null
     private var frontEnhanced: Bitmap? = null
@@ -137,6 +138,16 @@ class IdCardMainActivity : AppCompatActivity() {
         // App header back button
         binding.btnBack.setOnClickListener {
             finish()
+        }
+
+        // Mode toggle listener
+        binding.toggleMode.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                isDocumentMode = (checkedId == binding.btnModeDocument.id)
+                binding.cardBackSlot.visibility = if (isDocumentMode) View.GONE else View.VISIBLE
+                updateFrontCardUi()
+                invalidateCaches()
+            }
         }
 
         // Front slot listeners
@@ -249,19 +260,21 @@ class IdCardMainActivity : AppCompatActivity() {
         initialQuad: CardQuad? = null,
         isFront: Boolean = true
     ) {
-        val title = if (isFront) "Crop Front Side" else "Crop Back Side"
+        val title = if (isDocumentMode) "Crop Document" else if (isFront) "Crop Front Side" else "Crop Back Side"
         cropLauncher.launch(
             CropInput(
                 imagePath = imagePath,
                 imageUri = imageUri,
                 initialQuad = initialQuad,
                 title = title,
-                isFront = isFront
+                isFront = isFront,
+                isDocumentMode = isDocumentMode
             )
         )
     }
 
     private fun updateFrontCardUi() {
+        binding.tvFrontTitle.text = if (isDocumentMode) "Document Image" else "Front Side (Required)"
         val path = frontRawPath
         val quad = frontQuad
         if (path != null && quad != null) {
@@ -346,12 +359,16 @@ class IdCardMainActivity : AppCompatActivity() {
         showLoading("Enhancing card...")
         lifecycleScope.launch(Dispatchers.IO) {
             val bmp = BitmapFactory.decodeFile(path) ?: return@launch
-            val cleaned = engine.processCard(
-                bitmap = bmp,
-                quad = quad,
-                config = ProcessingConfig(autoWhiteBalance = true, autoFlatField = true),
-                isFront = side == CardSide.FRONT
-            )
+            val cleaned = if (isDocumentMode) {
+                engine.processDocument(bmp, quad, ProcessingConfig(autoWhiteBalance = true, autoFlatField = true))
+            } else {
+                engine.processCard(
+                    bitmap = bmp,
+                    quad = quad,
+                    config = ProcessingConfig(autoWhiteBalance = true, autoFlatField = true),
+                    isFront = side == CardSide.FRONT
+                )
+            }
             withContext(Dispatchers.Main) {
                 hideLoading()
                 val dialog = Dialog(this@IdCardMainActivity)
@@ -379,7 +396,8 @@ class IdCardMainActivity : AppCompatActivity() {
         val fQuad = frontQuad
 
         if (fPath == null || fQuad == null) {
-            Toast.makeText(this, "Please add the Front side of your card first", Toast.LENGTH_SHORT).show()
+            val msg = if (isDocumentMode) "Please add the document image first" else "Please add the Front side of your card first"
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -392,30 +410,46 @@ class IdCardMainActivity : AppCompatActivity() {
         showLoading("Composing 300 DPI A4 Page...")
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                // 1. Process Front Card
-                val frontBmp = BitmapFactory.decodeFile(fPath)
-                val frontCleaned = engine.processCard(frontBmp, fQuad, ProcessingConfig(), isFront = true)
-
-                // 2. Process Back Card if provided
-                var backCleaned: Bitmap? = null
-                val bPath = backRawPath
-                val bQuad = backQuad
-                if (bPath != null && bQuad != null) {
-                    val backBmp = BitmapFactory.decodeFile(bPath)
-                    backCleaned = engine.processCard(backBmp, bQuad, ProcessingConfig(), isFront = false)
-                }
-
-                // 3. Compose A4 Bitmap
-                val a4 = engine.composeA4(frontCleaned, backCleaned)
-
-                // 4. Generate PDF
+                val a4: Bitmap
+                val pdfFile: File
+                val pngFile: File
                 val timeTag = System.currentTimeMillis()
-                val pdfFile = File(cacheDir, "id_card_print_$timeTag.pdf")
-                PdfGenerator.generatePdf(a4, pdfFile)
 
-                // 5. Generate PNG
-                val pngFile = File(cacheDir, "id_card_print_$timeTag.png")
-                A4LayoutComposer.saveAsPng(a4, pngFile)
+                if (isDocumentMode) {
+                    val frontBmp = BitmapFactory.decodeFile(fPath)
+                    val frontCleaned = engine.processDocument(frontBmp, fQuad, ProcessingConfig())
+                    a4 = engine.composeDocumentA4(frontCleaned)
+
+                    pdfFile = File(cacheDir, "document_print_$timeTag.pdf")
+                    PdfGenerator.generatePdf(a4, pdfFile)
+
+                    pngFile = File(cacheDir, "document_print_$timeTag.png")
+                    A4LayoutComposer.saveAsPng(a4, pngFile)
+                } else {
+                    // 1. Process Front Card
+                    val frontBmp = BitmapFactory.decodeFile(fPath)
+                    val frontCleaned = engine.processCard(frontBmp, fQuad, ProcessingConfig(), isFront = true)
+
+                    // 2. Process Back Card if provided
+                    var backCleaned: Bitmap? = null
+                    val bPath = backRawPath
+                    val bQuad = backQuad
+                    if (bPath != null && bQuad != null) {
+                        val backBmp = BitmapFactory.decodeFile(bPath)
+                        backCleaned = engine.processCard(backBmp, bQuad, ProcessingConfig(), isFront = false)
+                    }
+
+                    // 3. Compose A4 Bitmap
+                    a4 = engine.composeA4(frontCleaned, backCleaned)
+
+                    // 4. Generate PDF
+                    pdfFile = File(cacheDir, "id_card_print_$timeTag.pdf")
+                    PdfGenerator.generatePdf(a4, pdfFile)
+
+                    // 5. Generate PNG
+                    pngFile = File(cacheDir, "id_card_print_$timeTag.png")
+                    A4LayoutComposer.saveAsPng(a4, pngFile)
+                }
 
                 withContext(Dispatchers.Main) {
                     hideLoading()

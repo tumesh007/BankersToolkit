@@ -157,6 +157,74 @@ object VisitPdfExporter {
             drawLongText("5. REMARKS / CONCLUSION", visit.remarks)
         }
 
+        fun drawTable(headers: List<String>, rows: List<List<String>>, colWeights: List<Float>?) {
+            val numCols = headers.size
+            val weights = colWeights ?: List(numCols) { 1.0f }
+            val totalWeight = weights.sum()
+
+            // Calculate column widths proportional to weights
+            val colWidths = mutableListOf<Int>()
+            var allocated = 0
+            for (i in 0 until numCols - 1) {
+                val w = ((weights[i] / totalWeight) * contentWidth).toInt()
+                colWidths.add(w)
+                allocated += w
+            }
+            colWidths.add(contentWidth - allocated)
+
+            val rowHeight = 22
+            val totalTableHeight = (1 + rows.size) * rowHeight + 15
+            if (currentPage.yPos - totalTableHeight < 60) {
+                newPage()
+            }
+
+            val tableTop = currentPage.yPos
+            val tableBottom = tableTop - (1 + rows.size) * rowHeight
+
+            // Draw header background
+            currentPage.content.append("0.93 0.93 0.93 rg\n")
+            currentPage.fillRect(marginX, tableTop - rowHeight, contentWidth, rowHeight)
+            currentPage.content.append("0 0 0 rg\n")
+
+            // Header text
+            var curX = marginX
+            for (i in 0 until numCols) {
+                val colW = colWidths[i]
+                currentPage.addText(curX + 6, tableTop - 15, headers[i], 9, isBold = true)
+                curX += colW
+            }
+
+            // Data rows text
+            var curY = tableTop - rowHeight
+            for (row in rows) {
+                curX = marginX
+                val isTotalRow = row.firstOrNull()?.contains("TOTAL", ignoreCase = true) == true
+                for (i in 0 until numCols) {
+                    val colW = colWidths[i]
+                    val cellText = if (i < row.size) row[i] else ""
+                    currentPage.addText(curX + 6, curY - 15, cellText, 9, isBold = isTotalRow)
+                    curX += colW
+                }
+                curY -= rowHeight
+            }
+
+            // Draw horizontal grid lines
+            for (r in 0..(1 + rows.size)) {
+                val lineY = tableTop - r * rowHeight
+                currentPage.addLine(marginX, lineY, marginX + contentWidth, lineY)
+            }
+
+            // Draw vertical grid lines
+            var vertX = marginX
+            currentPage.addLine(vertX, tableTop, vertX, tableBottom)
+            for (i in 0 until numCols) {
+                vertX += colWidths[i]
+                currentPage.addLine(vertX, tableTop, vertX, tableBottom)
+            }
+
+            currentPage.yPos = tableBottom - 15
+        }
+
         // --- PROFORMA FORMAT ---
         if (visit.reportFormat != kpt.core.model.visit.ReportFormat.GENERAL) {
             ProformaTemplates.injectProformaFields(
@@ -169,6 +237,9 @@ object VisitPdfExporter {
                 },
                 drawField = { key, value ->
                     drawKeyValue(key, value)
+                },
+                drawTable = { headers, rows, colWeights ->
+                    drawTable(headers, rows, colWeights)
                 }
             )
             currentPage.yPos -= 10

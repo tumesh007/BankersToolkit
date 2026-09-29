@@ -61,6 +61,25 @@ class IdCardEngine {
     }
 
     /**
+     * Processes a full page/document by rectifying perspective dynamically and enhancing.
+     */
+    fun processDocument(
+        bitmap: Bitmap,
+        quad: CardQuad,
+        config: ProcessingConfig = ProcessingConfig()
+    ): Bitmap {
+        val rectified = PerspectiveWarper.rectifyDynamic(bitmap, quad)
+        return CardEnhancer.enhance(rectified, config, isFront = false)
+    }
+
+    /**
+     * Composes a single document onto a full 300 DPI A4 sheet.
+     */
+    fun composeDocumentA4(documentImage: Bitmap): Bitmap {
+        return A4LayoutComposer.composeDocument(documentImage)
+    }
+
+    /**
      * Composes Front and optional Back card onto a 300 DPI single-page A4 Bitmap.
      */
     fun composeA4(

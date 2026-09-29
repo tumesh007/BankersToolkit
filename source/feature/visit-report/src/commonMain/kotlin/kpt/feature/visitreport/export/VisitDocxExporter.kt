@@ -79,10 +79,52 @@ object VisitDocxExporter {
             }
 
             if (visit.reportFormat != kpt.core.model.visit.ReportFormat.GENERAL) {
+                val drawTable: (List<String>, List<List<String>>, List<Float>?) -> Unit = { headers, rows, colWeights ->
+                    val numCols = headers.size
+                    val weights = colWeights ?: List(numCols) { 1.0f }
+                    val totalWeight = weights.sum()
+
+                    append("<w:tbl>")
+                    append("<w:tblPr><w:tblBorders>")
+                    append("<w:top w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"auto\"/>")
+                    append("<w:left w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"auto\"/>")
+                    append("<w:bottom w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"auto\"/>")
+                    append("<w:right w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"auto\"/>")
+                    append("<w:insideH w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"auto\"/>")
+                    append("<w:insideV w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"auto\"/>")
+                    append("</w:tblBorders><w:tblW w:w=\"5000\" w:type=\"pct\"/></w:tblPr>")
+
+                    // Header row
+                    append("<w:tr>")
+                    for (i in 0 until numCols) {
+                        val pct = ((weights[i] / totalWeight) * 5000).toInt()
+                        append("<w:tc><w:tcPr><w:tcW w:w=\"$pct\" w:type=\"pct\"/><w:shd w:val=\"clear\" w:color=\"auto\" w:fill=\"F2F2F2\"/></w:tcPr>")
+                        append("<w:p><w:pPr><w:spacing w:before=\"60\" w:after=\"60\"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val=\"20\"/></w:rPr><w:t xml:space=\"preserve\">${esc(headers[i])}</w:t></w:r></w:p></w:tc>")
+                    }
+                    append("</w:tr>")
+
+                    // Data rows
+                    for (row in rows) {
+                        val isTotalRow = row.firstOrNull()?.contains("TOTAL", ignoreCase = true) == true
+                        append("<w:tr>")
+                        for (i in 0 until numCols) {
+                            val pct = ((weights[i] / totalWeight) * 5000).toInt()
+                            val cellText = if (i < row.size) row[i] else ""
+                            append("<w:tc><w:tcPr><w:tcW w:w=\"$pct\" w:type=\"pct\"/></w:tcPr>")
+                            val boldTag = if (isTotalRow) "<w:b/>" else ""
+                            append("<w:p><w:pPr><w:spacing w:before=\"40\" w:after=\"40\"/></w:pPr><w:r><w:rPr>$boldTag<w:sz w:val=\"20\"/></w:rPr><w:t xml:space=\"preserve\">${esc(cellText)}</w:t></w:r></w:p></w:tc>")
+                        }
+                        append("</w:tr>")
+                    }
+                    append("</w:tbl>")
+                    append("<w:p/>")
+                }
+
                 ProformaTemplates.injectProformaFields(
                     visit = visit,
                     drawHeading = { heading(it) },
-                    drawField = { key, value -> field(key, value) }
+                    drawField = { key, value -> field(key, value) },
+                    drawTable = drawTable
                 )
                 line()
             }
