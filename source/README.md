@@ -29,16 +29,15 @@
   - Month-by-month payment schedule table (Opening balance, EMI, Principal paid, Interest paid, Closing balance).
   - Floating-point rounding convergence handling ($B_n = 0.00$).
 
-### 3. DOCUMENT TOOLS (Source Retained, Unwired from Android)
+### 3. DOCUMENT & KYC TOOLS
+- **ID Card & Document Printer (`:feature:idcard-printer`)**:
+  - Pre-configured templates for Aadhaar, PAN Card, Voter ID, Driving License, and Custom card sizes.
+  - Full A4 Document mode with dynamic quad perspective rectification via corner Euclidean distances.
+  - Direct wireless/system printing and PDF export.
 - **PDF Redactor (`:feature:pdf-redactor`)**:
   - Offline PDF watermark removal for portal download stamps (e.g. `PNB SAKSHAM <Employee ID> <Date/Time>`).
   - User-configurable Employee ID mode (**no hard-coded IDs**).
-  - Rectangle coordinate pattern masking.
-  - **Available as standalone module and separate project** (`/home/pnb/Projects/Pdf-Redactor`), but **not included in the Android app**.
-- **Longbook Merger (`:feature:longbook-merger`)**:
-  - Clean-room Kotlin port for Finacle/CBSL long book reports.
-  - Generates print-ready **A4 Landscape PDF** merged documents.
-  - **Commented out of Android build** (`settings.gradle.kts`).
+  - Rectangle coordinate pattern masking and text blackout.
 
 ---
 
@@ -72,12 +71,13 @@ Output APK: `cmp-android/build/outputs/apk/demo/debug/cmp-android-demo-debug.apk
 
 ---
 
-## 📦 Final Android App Composition
+## 📦 App Composition
 | Category | Features |
 |----------|----------|
-| **FIELD TOOLS** | Visit Reports, GPS Camera |
+| **FIELD TOOLS** | Visit Reports (Standard & Annexure I-A), GPS Camera |
 | **FINANCIAL TOOLS** | EMI Calculator, Amortization |
-| **REMOVED FROM APP** | PDF Reader, PDF Redactor, Longbook Merger |
+| **DOCUMENT & KYC TOOLS** | ID Card & Document Printer, PDF Redactor |
+| **EXCLUDED FROM APP** | PDF Reader, Longbook Merger |
 
 ---
 
