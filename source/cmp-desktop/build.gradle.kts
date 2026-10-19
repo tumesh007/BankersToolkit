@@ -94,10 +94,9 @@ compose.desktop {
         javaHome = javaToolchains.launcherFor {
             languageVersion.set(JavaLanguageVersion.of(libs.versions.jvmToolchain.get().toInt()))
         }.get().metadata.installationPath.asFile.absolutePath
-        jvmArgs("-Dapp.name=$windowTitle")
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Pkg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
-            packageName = windowTitle
+            packageName = "bankers-toolkit"
             packageVersion = appVersion
             description = forkProp("app.description", "$appName desktop")
             copyright = forkProp("org.copyright", "© 2026 ${forkProp("org.name", appName)}. All rights reserved.")
@@ -169,6 +168,8 @@ compose.desktop {
             linux {
                 modules("jdk.security.auth")
                 iconFile.set(project.file("icons/ic_launcher.png"))
+                menuGroup = "Office;Finance;"
+                appCategory = "Finance"
             }
         }
         buildTypes.release.proguard {
