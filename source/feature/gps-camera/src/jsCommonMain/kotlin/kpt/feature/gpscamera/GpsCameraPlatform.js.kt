@@ -1,14 +1,9 @@
 package kpt.feature.gpscamera
 
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 
-/**
- * Non-Android degradation: no camera, no GPS. The screen renders with
- * permissions unavailable and capture disabled — the feature targets the
- * Android field-tool experience.
- */
 actual object GpsCameraPlatform {
     @Composable
     actual fun CameraPreview(
@@ -17,6 +12,7 @@ actual object GpsCameraPlatform {
         isTorchOn: Boolean,
         onError: (String) -> Unit
     ) = Unit
+
     actual fun hasCameraPermission(): Boolean = false
 
     actual fun hasLocationPermission(): Boolean = false
@@ -55,6 +51,6 @@ actual object GpsCameraPlatform {
     actual suspend fun extractPhotoMetadata(path: String): PhotoMetadata? = null
 
     actual fun sharePhoto(path: String) = Unit
-    
+
     actual suspend fun savePhotoToGallery(path: String): Boolean = false
 }
