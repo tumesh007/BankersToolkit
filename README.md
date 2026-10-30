@@ -6,6 +6,7 @@
 
 ## 📱 Supported Platforms
 
+- **Web Application (Wasm / JS)**: Live on GitHub Pages at [https://tumesh007.github.io/BankersToolkit/](https://tumesh007.github.io/BankersToolkit/) (runs in modern desktop and mobile browsers via WebAssembly).
 - **Android** (API 26+): Mobile field kit with camera integration, GPS mock-detection, offline storage, and document processing.
 - **Ubuntu Linux Desktop** (amd64): Native desktop application with bundled Java 21 runtime, native GNOME/Zenity file picker, and native PDF/Word document generation.
 
