@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.js.ExperimentalWasmJsInterop::class)
+
 package kpt.feature.gpscamera
 
 import androidx.compose.foundation.background
@@ -22,17 +24,26 @@ import androidx.compose.ui.unit.sp
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CompletableDeferred
-import org.khronos.webgl.ArrayBuffer
-import org.khronos.webgl.Int8Array
-import org.khronos.webgl.get
-import org.w3c.dom.HTMLAnchorElement
 import org.w3c.dom.HTMLInputElement
-import org.w3c.dom.url.URL
-import org.w3c.files.Blob
-import org.w3c.files.BlobPropertyBag
 import org.w3c.files.FileReader
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+
+@JsFun("""
+(dataUrl, fileName) => {
+    try {
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    } catch (e) {
+        console.error("Save image failed", e);
+    }
+}
+""")
+private external fun jsDownloadDataUrl(dataUrl: String, fileName: String)
 
 actual object GpsCameraPlatform {
 
@@ -178,32 +189,13 @@ actual object GpsCameraPlatform {
         } catch (_: Throwable) {}
     }
 
-    @OptIn(ExperimentalEncodingApi::class)
     actual suspend fun savePhotoToGallery(path: String): Boolean {
         return try {
-            val base64Data = when {
-                path.startsWith("data:") && path.contains(",") -> path.substringAfter(",")
-                else -> path
+            val dataUrl = when {
+                path.startsWith("data:") -> path
+                else -> "data:image/jpeg;base64,$path"
             }
-            val bytes = Base64.decode(base64Data)
-            val int8Array = Int8Array(bytes.size)
-            for (i in bytes.indices) {
-                int8Array[i] = bytes[i]
-            }
-
-            val blobProps = BlobPropertyBag(type = "image/jpeg")
-            val parts = js("[]")
-            parts.push(int8Array)
-            val blob = Blob(parts, blobProps)
-
-            val url = URL.createObjectURL(blob)
-            val anchor = document.createElement("a") as HTMLAnchorElement
-            anchor.href = url
-            anchor.download = "bankers_toolkit_${window.performance.now().toLong()}.jpg"
-            document.body?.appendChild(anchor)
-            anchor.click()
-            document.body?.removeChild(anchor)
-            URL.revokeObjectURL(url)
+            jsDownloadDataUrl(dataUrl, "bankers_toolkit_${window.performance.now().toLong()}.jpg")
             true
         } catch (_: Throwable) {
             false
